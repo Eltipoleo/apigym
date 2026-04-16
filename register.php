@@ -8,7 +8,7 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 require 'vendor/autoload.php';
 
-// 1. LEER DATOS CON ESCUDO PROTECTOR (Igual que en el login)
+// 1. LEER DATOS CON ESCUDO PROTECTOR
 $json = file_get_contents("php://input");
 $data = json_decode($json);
 
@@ -51,30 +51,41 @@ if ($stmt->execute()) {
         $mail->Host       = 'smtp.gmail.com';
         $mail->SMTPAuth   = true;
         $mail->Username   = 'joserty83@gmail.com'; 
-        $mail->Password   = 'wcdjizplhwpfqohk'; 
+        $mail->Password   = 'gkucqvjuzuqoxsqf'; // Tu nueva App Password
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port       = 587;
+        $mail->CharSet    = 'UTF-8'; // Para soporte de acentos y eñes
 
         // Remitente y Destinatario
-        $mail->setFrom('joserty83@gmail.com', 'Gym');
+        $mail->setFrom('joserty83@gmail.com', 'Gym System');
         $mail->addAddress($email, $nombre);
 
         // Contenido del correo
         $mail->isHTML(true);
-        $mail->Subject = 'Codigo de Verificacion - Gym System';
-        $mail->Body    = "Hola <b>$nombre</b>,<br><br>Tu código de verificación es: <h2>$codigo_verificacion</h2><br>Ingrésalo en la aplicación para activar tu cuenta.";
+        $mail->Subject = 'Código de Verificación - Gym System';
+        $mail->Body    = "
+            <div style='font-family: sans-serif; border: 1px solid #eee; padding: 20px; border-radius: 10px;'>
+                <h2 style='color: #333;'>Hola $nombre,</h2>
+                <p>Tu código de verificación para activar tu cuenta es:</p>
+                <div style='background: #f8f9fa; padding: 20px; text-align: center; font-size: 32px; font-weight: bold; letter-spacing: 10px; color: #007bff; border-radius: 5px;'>
+                    $codigo_verificacion
+                </div>
+                <p style='margin-top: 20px; color: #666;'>Ingrésalo en la aplicación para completar tu registro.</p>
+            </div>";
 
-        // --- ATENCIÓN AQUÍ ---
-        // El envío de correo sigue comentado para asegurar que pases de pantalla primero
-        // $mail->send(); 
+        // ENVÍO REAL DEL CORREO
+        $mail->send(); 
 
-        // ESTO FALTABA: La respuesta de éxito que React estaba esperando desesperadamente
         echo json_encode(["success" => true, "message" => "Cuenta creada. Revisa tu correo electrónico."]);
-        exit; // Siempre pon exit después de un echo json_encode
+        exit;
 
     } catch (Exception $e) {
-        // Si falla el correo, igual se creó la cuenta, pero informamos del error
-        echo json_encode(["success" => true, "message" => "Cuenta creada, pero el correo no se pudo enviar. Mailer Error: {$mail->ErrorInfo}"]);
+        // Si falla el envío por algo técnico (puertos, dns), avisamos pero el usuario ya existe en DB
+        echo json_encode([
+            "success" => true, 
+            "message" => "Cuenta creada, pero hubo un error enviando el correo. Contacta a soporte.",
+            "debug" => $mail->ErrorInfo
+        ]);
         exit;
     }
 } else {
