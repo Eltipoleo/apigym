@@ -9,8 +9,19 @@ header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header("Content-Type: application/json");
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(200); exit; }
+// Reemplaza la lógica anterior por esta:
+$request = '';
 
-$request = $_GET['url'] ?? explode('/', trim($_SERVER['REQUEST_URI'], '/')) ?? '';
+if (isset($_GET['url'])) {
+    // Si viene por el parámetro ?url=
+    $request = is_array($_GET['url']) ? $_GET['url'] : $_GET['url'];
+} else {
+    // Si viene por la URL limpia (/usuarios)
+    $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+    $parts = explode('/', trim($path, '/'));
+    $request = $parts ?? '';
+}
+
 $request = rtrim($request, '/');
 
 switch ($request) {
