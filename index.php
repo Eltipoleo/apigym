@@ -10,19 +10,16 @@ header("Content-Type: application/json");
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(200); exit; }
 // Reemplaza la lógica anterior por esta:
-$request = '';
+// --- REEMPLAZA DESDE AQUÍ ---
+$request = $_GET['url'] ?? '';
 
-if (isset($_GET['url'])) {
-    // Si viene por el parámetro ?url=
-    $request = is_array($_GET['url']) ? $_GET['url'] : $_GET['url'];
-} else {
-    // Si viene por la URL limpia (/usuarios)
-    $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-    $parts = explode('/', trim($path, '/'));
-    $request = $parts ?? '';
+// Si por alguna razón recibimos un array, tomamos el primer elemento
+if (is_array($request)) {
+    $request = $request ?? '';
 }
 
-$request = rtrim($request, '/');
+$request = rtrim((string)$request, '/');
+// --- HASTA AQUÍ ---
 
 switch ($request) {
     case 'usuarios':
