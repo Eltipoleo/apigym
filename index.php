@@ -10,7 +10,7 @@ header("Content-Type: application/json");
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(200); exit; }
 
-$request = $_GET['url'] ?? '';
+$request = $_GET['url'] ?? explode('/', trim($_SERVER['REQUEST_URI'], '/')) ?? '';
 $request = rtrim($request, '/');
 
 switch ($request) {
