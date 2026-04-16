@@ -41,18 +41,21 @@ if (is_array($request)) {
 $request = rtrim((string)$request, '/');
 // --- HASTA AQUÍ ---
 
-switch ($request) {
-    case 'usuarios':
-        require 'get_usuarios.php';
-        break;
+// ... dentro de tu index.php ...
+$url = $_GET['url'] ?? '';
+
+switch ($url) {
     case 'login':
-        require 'login.php';
+        include 'login.php';
         break;
     case 'registro':
-        require 'register.php';
+        include 'register.php';
         break;
+    case 'verificar_codigo': // ESTO ES LO QUE FALTA
+        include 'verificar_codigo.php'; 
+        break;
+    // ... otros casos ...
     default:
-        http_response_code(404);
-        echo json_encode(["message" => "Ruta no encontrada", "ruta_solicitada" => $request]);
+        echo json_encode(["message" => "Ruta no encontrada", "ruta_solicitada" => $url]);
         break;
 }
