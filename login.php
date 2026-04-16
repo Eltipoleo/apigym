@@ -1,17 +1,26 @@
 <?php
 // gym-api/login.php
 
-
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(200); exit; }
 
 include("db.php");
 include("jwt_utils.php");
 
-$data = json_decode(file_get_contents("php://input"));
+// 1. LEER DATOS CON ESCUDO PROTECTOR
+$json = file_get_contents("php://input");
+$data = json_decode($json);
+
+// Validar que realmente llegaron el email y el password
+if (!$data || !isset($data->email) || !isset($data->password)) {
+    http_response_code(400); // Bad Request
+    echo json_encode(["success" => false, "message" => "Faltan datos de inicio de sesión."]);
+    exit;
+}
+
 $email = $data->email;
 $password = $data->password;
 
-// 1. OBTENER USUARIO POR EMAIL
+// 2. OBTENER USUARIO POR EMAIL
 $sql = "SELECT * FROM usuarios WHERE email=?";
 $stmt = $conexion->prepare($sql);
 $stmt->bind_param("s", $email);
@@ -21,17 +30,17 @@ $result = $stmt->get_result();
 if ($result->num_rows > 0) {
     $user = $result->fetch_assoc();
 
-    // 2. PREVENCIÓN DE FUERZA BRUTA (Bloqueo temporal)
+    // 3. PREVENCIÓN DE FUERZA BRUTA (Bloqueo temporal)
     if ($user['bloqueo_hasta'] && strtotime($user['bloqueo_hasta']) > time()) {
         http_response_code(429); // Too Many Requests
         echo json_encode(["success" => false, "message" => "Cuenta bloqueada temporalmente por múltiples intentos fallidos. Intenta más tarde."]);
         exit;
     }
 
-    // 3. VALIDAR CONTRASEÑA
+    // 4. VALIDAR CONTRASEÑA
     if ($user['password'] === $password) { // Nota: En un entorno 100% real se usa password_verify()
         
-        // 4. BLOQUEO DE SESIONES MÚLTIPLES (Destruir sesiones anteriores)
+        // BLOQUEO DE SESIONES MÚLTIPLES (Destruir sesiones anteriores)
         $del_stmt = $conexion->prepare("DELETE FROM sesiones WHERE usuario_id = ?");
         $del_stmt->bind_param("i", $user['id']);
         $del_stmt->execute();
@@ -56,7 +65,14 @@ if ($result->num_rows > 0) {
         $stmt_sesion->bind_param("issss", $user['id'], $session_id, $token_hash, $dispositivo, $ip);
         $stmt_sesion->execute();
 
-        setcookie("refresh_token", $refresh_token, ['expires' => time() + (7*24*60*60), 'path' => '/', 'domain' => 'localhost', 'secure' => false, 'httponly' => true, 'samesite' => 'Strict']);
+        // 5. COOKIES PARA PRODUCCIÓN (¡Muy importante para Railway/Vercel!)
+        setcookie("refresh_token", $refresh_token, [
+            'expires' => time() + (7*24*60*60), 
+            'path' => '/', 
+            'secure' => true,       // Obligatorio en la nube (HTTPS)
+            'httponly' => true, 
+            'samesite' => 'None'    // Permite que dominios diferentes compartan la cookie
+        ]);
 
         echo json_encode(["success" => true, "access_token" => $access_token, "id" => $user['id'], "rol" => $user['rol'], "nombre" => $user['nombre'], "email" => $user['email']]);
     } else {
