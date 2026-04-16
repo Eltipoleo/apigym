@@ -56,11 +56,11 @@ if ($stmt->execute()) {
         $mail->Subject = 'Codigo de Verificacion - Gym System';
         $mail->Body    = "Hola <b>$nombre</b>,<br><br>Tu código de verificación es: <h2>$codigo_verificacion</h2><br>Ingrésalo en la aplicación para activar tu cuenta.";
 
-        $mail->send();
-        echo json_encode(["success" => true, "message" => "Cuenta creada. Revisa tu correo electrónico."]);
+       // $mail->send();
+        //echo json_encode(["success" => true, "message" => "Cuenta creada. Revisa tu correo electrónico."]);
     } catch (Exception $e) {
         // Si falla el correo, igual se creó la cuenta, pero informamos del error
-        echo json_encode(["success" => true, "message" => "Cuenta creada, pero el correo no se pudo enviar. Mailer Error: {$mail->ErrorInfo}"]);
+        //echo json_encode(["success" => true, "message" => "Cuenta creada, pero el correo no se pudo enviar. Mailer Error: {$mail->ErrorInfo}"]);
     }
 } else {
     echo json_encode(["success" => false, "message" => "Error al registrar en la base de datos"]);
