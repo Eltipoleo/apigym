@@ -19,23 +19,23 @@ $request = rtrim($request, '/');
 // 3. Enrutador: decide qué archivo cargar según la URL
 switch ($request) {
     case 'login':
-        require 'login.php';
+        require 'gym-api/login.php';
         break;
         
     case 'usuarios':
-        require 'get_usuarios.php';
+        require 'gym-api/get_usuarios.php';
         break;
 
     case 'registro':
-        require 'register.php';
+        require 'gym-api/register.php';
         break;
 
     case 'add-tiempo':
-        require 'add_tiempo.php';
+        require 'gym-api/add_tiempo.php';
         break;
 
     // Puedes seguir agregando más casos para tus otros archivos:
-    // case 'publicaciones': require 'get_publicaciones.php'; break;
+    // case 'publicaciones': require 'gym-api/get_publicaciones.php'; break;
 
     default:
         // Si no encuentra la ruta, devuelve un error 404
