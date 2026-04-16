@@ -56,6 +56,10 @@ if ($stmt->execute()) {
         $mail->Port       = 587;
         $mail->CharSet    = 'UTF-8'; // Para soporte de acentos y eñes
 
+        // AGREGAR ESTO: Tiempos de espera cortos para que no trabe el server
+        $mail->Timeout       = 10; // 10 segundos máximo
+        $mail->SMTPKeepAlive = false;
+
         // Remitente y Destinatario
         $mail->setFrom('joserty83@gmail.com', 'Gym System');
         $mail->addAddress($email, $nombre);
