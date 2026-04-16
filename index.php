@@ -58,4 +58,9 @@ switch ($url) {
     default:
         echo json_encode(["message" => "Ruta no encontrada", "ruta_solicitada" => $url]);
         break;
+        
+
+    case 'get_perfil':
+        include 'get_perfil.php';
+    break;
 }
